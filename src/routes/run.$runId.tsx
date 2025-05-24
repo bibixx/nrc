@@ -80,12 +80,9 @@ function RunDetailsPage() {
           </Card>
         ))}
         <div className="flex justify-end">
-          <button
-            onClick={() => handleOpenInApp(run.id)}
-            className="px-4 py-2 bg-neon-600 text-white rounded-md hover:bg-neon-700 transition-colors"
-          >
+          <Button onClick={() => handleOpenInApp(run.id)} variant="default">
             Start Run
-          </button>
+          </Button>
         </div>
       </div>
     </div>
