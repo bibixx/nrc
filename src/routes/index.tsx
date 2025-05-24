@@ -74,6 +74,10 @@ function IndexPage() {
 
   return (
     <>
+      <div className="h-4 sticky top-0 left-0 w-full z-10">
+        <div className="absolute inset-0 mask-gradient-to-b mask-b-from-0 backdrop-blur-xs" />
+        <div className="absolute inset-0 fadeout-to-bottom"></div>
+      </div>
       <div className="mx-auto container p-4 pb-0 max-w-3xl">
         <Header
           searchQuery={searchQuery}
