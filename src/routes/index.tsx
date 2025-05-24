@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Run } from "@/components/icons/Run";
 import { Footer } from "@/components/Footer";
 import { ENRICHED_RUNS } from "@/data/endrichedRuns";
+import { BULLET_POINT, NARROW_NON_BREAKING_SPACE, NON_BREAKING_SPACE } from "@/lib/text";
 
 export const Route = createFileRoute("/")({
   component: IndexPage,
@@ -60,80 +61,111 @@ function IndexPage() {
   };
 
   return (
-    <div className="mx-auto container max-w-3xl">
-      <Header
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedActivityType={selectedActivityType}
-        setSelectedActivityType={setSelectedActivityType}
-        activityTypes={activityTypes}
-      />
-      <div
-        ref={listRef}
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          width: "100%",
-          position: "relative",
-        }}
-      >
-        {virtualizer.getVirtualItems().map((item) => {
-          console.log(item);
+    <>
+      <div className="mx-auto container p-4 pb-0 max-w-3xl">
+        <Header
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedActivityType={selectedActivityType}
+          setSelectedActivityType={setSelectedActivityType}
+          activityTypes={activityTypes}
+        />
+        <div
+          ref={listRef}
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {virtualizer.getVirtualItems().map((item) => {
+            const run = filteredRuns[item.index];
+            const runDetails = run.runDetails;
 
-          const run = filteredRuns[item.index];
-          const runDetails = run.runDetails;
+            const propertyGoal = formatGoal(run.properties.goal, run.properties.activityType);
 
-          return (
-            <div
-              ref={virtualizer.measureElement}
-              data-index={item.index}
-              key={run.id}
-              className="absolute top-0 left-0 w-full"
-              style={{ transform: `translateY(${item.start}px)` }}
-            >
-              <Card
-                asChild
-                className={cn(
-                  "cursor-pointer transition-[background,scale]",
-                  "border-0 border-shine",
-                  "bg-foreground/5 hover:bg-foreground/10",
-                  "transform-sc hover:scale-[1.01]",
-                  "flex flex-col",
-                  "select-none",
-                )}
+            return (
+              <div
+                ref={virtualizer.measureElement}
+                data-index={item.index}
+                key={run.id}
+                className="absolute top-0 left-0 w-full"
+                style={{ transform: `translateY(${item.start}px)` }}
               >
-                <Link to="/run/$runId" params={{ runId: run.id }}>
-                  <CardHeader className="gap-1">
-                    <CardTitle>{run.landing.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{run.landing.subtitle}</p>
-                  </CardHeader>
-                  <CardContent className="flex flex-col items-start flex-1">
-                    {runDetails?.body && (
-                      <div
-                        className="text-sm font-medium line-clamp-5"
-                        dangerouslySetInnerHTML={{ __html: runDetails.body }}
-                      />
-                    )}
-                    <div className="flex-1" />
-                    <Button
-                      className="mt-6"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenInApp(run.id);
-                      }}
-                    >
-                      <Run />
-                      Open in App
-                    </Button>
-                  </CardContent>
-                </Link>
-              </Card>
-            </div>
-          );
-        })}
+                <Card
+                  asChild
+                  className={cn(
+                    "cursor-pointer transition-[background,scale]",
+                    "border-0 border-shine",
+                    "bg-foreground/5 hover:bg-foreground/10",
+                    "transform-sc hover:scale-[1.01]",
+                    "flex flex-col",
+                    "select-none",
+                  )}
+                >
+                  <Link to="/run/$runId" params={{ runId: run.id }}>
+                    <CardHeader className="gap-1">
+                      <CardTitle>{run.landing.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {run.runType} {BULLET_POINT} {propertyGoal}
+                      </p>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-start flex-1">
+                      {runDetails?.body && (
+                        <div
+                          className="text-sm font-medium line-clamp-5"
+                          dangerouslySetInnerHTML={{ __html: runDetails.body }}
+                        />
+                      )}
+                      <div className="flex-1" />
+                      <Button
+                        className="mt-6"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleOpenInApp(run.id);
+                        }}
+                      >
+                        <Run />
+                        Open in App
+                      </Button>
+                    </CardContent>
+                  </Link>
+                </Card>
+              </div>
+            );
+          })}
+        </div>
       </div>
       <Footer className="py-12" />
-    </div>
+    </>
   );
+}
+
+function formatTime(time: number) {
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+
+  if (seconds === 0) {
+    return `${minutes} min`;
+  }
+
+  const minutesPart = minutes + NARROW_NON_BREAKING_SPACE + "min";
+  const secondsPart = seconds.toString().padStart(2, "0") + NARROW_NON_BREAKING_SPACE + "sec";
+
+  if (seconds === 0) {
+    return minutesPart;
+  }
+
+  return minutesPart + NON_BREAKING_SPACE + secondsPart;
+}
+
+function formatGoal(goal: number, activityType: "DURATION" | "DISTANCE" | "SPEED_DURATION") {
+  if (activityType === "SPEED_DURATION" || activityType === "DURATION") {
+    return formatTime(goal);
+  }
+
+  const distance = (goal / 1000).toFixed(2);
+  return distance + NARROW_NON_BREAKING_SPACE + "km";
 }
 
 interface HeaderProps {
@@ -152,7 +184,7 @@ const Header = ({
 }: HeaderProps) => {
   return (
     <>
-      <h1 className="text-2xl font-bold mb-6 mt-4 select-none">
+      <h1 className="text-2xl font-bold mb-6 select-none">
         <span className="text-primary">
           <Run className="w-6 h-6 mr-1.5 -mt-[3px] inline-block" />
           NRC

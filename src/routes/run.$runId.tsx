@@ -111,7 +111,7 @@ function RunDetailsPage() {
 
           <div className="absolute bottom-0 left-0 w-full">
             <div className="absolute inset-0 -top-32 fadeout-to-top" />
-            <div className="absolute inset-0 -top-16 mask-gradient-to-t backdrop-blur-md mask-t-from-0" />
+            <div className="absolute inset-0 -top-16 mask-gradient-to-t backdrop-blur-md mask-t-from-16" />
             <div className="relative container mx-auto p-4 flex justify-between items-center">
               <div>
                 <h1 className="text-3xl font-bold text-white drop-shadow-lg">{run.detail.headerCard.title}</h1>
@@ -137,21 +137,33 @@ function RunDetailsPage() {
             <RunSectionContents content={content} key={index} />
           ))}
         </div>
-        <div className="md:hidden sticky bottom-4 left-0 w-full flex justify-center z-10">
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              handleOpenInApp(run.id);
-            }}
-            size="lg"
-            className={cn("opacity-0 scale-90 transition-[opacity,scale] duration-300", {
-              "opacity-100 scale-100": isBottomButtonVisible,
-            })}
-          >
-            <Run />
-            Open in App
-          </Button>
-        </div>
+      </div>
+
+      <div
+        className={cn(
+          "sticky bottom-0 left-0 pb-4 w-full flex justify-center z-10",
+          "opacity-0 transition-[opacity] duration-300",
+          {
+            "opacity-100": isBottomButtonVisible,
+          },
+        )}
+      >
+        <div className="absolute inset-0 -top-4 backdrop-blur-xs mask-t-from-[32px]" />
+        <div className="absolute inset-0 -top-4 fadeout-to-top" />
+
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            handleOpenInApp(run.id);
+          }}
+          size="lg"
+          className={cn("scale-90 transition-[scale] duration-300", {
+            "scale-100": isBottomButtonVisible,
+          })}
+        >
+          <Run />
+          Open in App
+        </Button>
       </div>
       <Footer />
     </>
@@ -166,37 +178,48 @@ const RunSectionContents = (props: RunSectionProps) => {
   const headingClassName = cn("text-2xl font-bold mb-1");
 
   if (content.type === "MUSIC") {
+    console.log(content);
+
     return (
       <section>
-        <h2 className={cn(headingClassName, "mb-2")}>Suggested Music</h2>
-        <div className="flex gap-2 items-start">
-          {content.providers.map((provider) => (
-            <Button
-              key={provider.type}
-              asChild
-              variant="secondary"
-              className={cn("no-underline align-start", {
-                "bg-[#e64d58] hover:bg-[#e64d58]/80": provider.type === "APPLE_MUSIC",
-                "bg-[#65d46e] hover:bg-[#65d46e]/80 text-black": provider.type === "SPOTIFY",
-              })}
-            >
-              <a key={provider.type} href={provider.url} target="_blank" rel="noopener noreferrer">
-                {provider.type === "APPLE_MUSIC" ? (
-                  <>
-                    <AppleMusic className="w-5 h-5" />
-                    Apple Music
-                  </>
-                ) : provider.type === "SPOTIFY" ? (
-                  <>
-                    <Spotify className="w-5 h-5" />
-                    Spotify
-                  </>
-                ) : (
-                  provider.type
-                )}
-              </a>
-            </Button>
-          ))}
+        <h2 className={cn(headingClassName, "mb-3")}>Suggested Music</h2>
+        <div className="flex gap-4 items-stretch">
+          <div className="w-18 h-18 rounded-sm relative">
+            <img src={content.url} className="w-full h-full object-cover rounded-[inherit]" alt="" />
+            <div className="absolute inset-0 inset-ring inset-ring-foreground/10 rounded-[inherit]" />
+          </div>
+          <div className="flex flex-col justify-between">
+            <div className="text-xl font-bold">{content.title}</div>
+            <div className="flex gap-2 items-start">
+              {content.providers.map((provider) => (
+                <Button
+                  key={provider.type}
+                  asChild
+                  variant="secondary"
+                  className={cn("no-underline align-start", {
+                    "bg-[#e64d58] hover:bg-[#e64d58]/80": provider.type === "APPLE_MUSIC",
+                    "bg-[#65d46e] hover:bg-[#65d46e]/80 text-black": provider.type === "SPOTIFY",
+                  })}
+                >
+                  <a key={provider.type} href={provider.url} target="_blank" rel="noopener noreferrer">
+                    {provider.type === "APPLE_MUSIC" ? (
+                      <>
+                        <AppleMusic className="w-5 h-5" />
+                        Apple Music
+                      </>
+                    ) : provider.type === "SPOTIFY" ? (
+                      <>
+                        <Spotify className="w-5 h-5" />
+                        Spotify
+                      </>
+                    ) : (
+                      provider.type
+                    )}
+                  </a>
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     );

@@ -23,7 +23,7 @@ export interface Properties {
   activeGoal: number;
   autodownload: boolean;
   goal: number;
-  activityType: string;
+  activityType: "DURATION" | "DISTANCE" | "SPEED_DURATION";
   profiles: Array<any>;
   previousId?: string;
   previousIds?: Array<string>;

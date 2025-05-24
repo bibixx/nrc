@@ -69,8 +69,30 @@ function getRunType(run: AudioGuidedRun): RunType {
   return "Other";
 }
 
-export const ENRICHED_RUNS = runsData.map((run) => ({
+export const ENRICHED_RUNS = (runsData as AudioGuidedRun[]).map((run) => ({
   ...run,
   runType: getRunType(run),
   runDetails: run.detail.content.find((content) => content.type === "TEXT" && content.title === "Run Details"),
+  detail: {
+    ...run.detail,
+    content: run.detail.content.map((content) => {
+      if (content.type !== "MUSIC") {
+        return content;
+      }
+
+      return {
+        ...content,
+        providers: content.providers.map((provider) => {
+          if (provider.type === "APPLE MUSIC") {
+            return {
+              ...provider,
+              type: "APPLE_MUSIC",
+            };
+          }
+
+          return provider;
+        }),
+      };
+    }),
+  },
 }));
