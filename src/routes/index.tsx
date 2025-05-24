@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useElementScrollRestoration } from "@tanstack/react-router";
+import { Link, createFileRoute, useElementScrollRestoration, useSearch } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -21,13 +21,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      q: (search.q as string) || undefined,
+    };
+  },
   component: IndexPage,
 });
 
 const UNSELECTED_ACTIVITY_TYPES: RunType[] = ["Pregnancy", "Race", "Walk", "Treadmill"];
 let cache: VirtualItem[] = [];
 function IndexPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const search = useSearch({ from: "/" });
+  const [searchQuery, setSearchQuery] = useState(search.q || "");
 
   // Get unique activity types
   const activityTypes = useMemo(() => {
@@ -81,7 +87,12 @@ function IndexPage() {
       <div className="mx-auto container p-4 pb-0 max-w-3xl">
         <Header
           searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          setSearchQuery={(value) => {
+            setSearchQuery(value);
+            // Update URL search params
+
+            window.history.replaceState({}, "", value ? `?q=${encodeURIComponent(value)}` : window.location.pathname);
+          }}
           selectedActivityTypes={selectedActivityTypes}
           setSelectedActivityTypes={setSelectedActivityTypes}
           activityTypes={activityTypes}
