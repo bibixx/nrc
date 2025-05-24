@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import runsData from "../data/runs.json";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { ChevronLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import type { Content } from "@/data/runs.json.d";
 import { Button } from "@/components/ui/button";
+import { ENRICHED_RUNS } from "@/data/endrichedRuns";
+import { Run } from "@/components/icons/Run";
+import { cn } from "@/lib/utils";
+import { AppleMusic } from "@/components/icons/AppleMusic";
+import { Spotify } from "@/components/icons/Spotify";
+import { Footer } from "@/components/Footer";
+import { useImageLoadState } from "@/hooks/useImageLoadState";
 
 export const Route = createFileRoute("/run/$runId")({
   component: RunDetailsPage,
@@ -9,82 +17,204 @@ export const Route = createFileRoute("/run/$runId")({
 
 function RunDetailsPage() {
   const { runId } = Route.useParams();
-  const run = runsData.data.audioGuidedRuns.find((r) => r.id === runId);
-
-  if (!run) {
-    return <div>Run not found</div>;
-  }
+  const run = ENRICHED_RUNS.find((r) => r.id === runId);
+  const { loadingState, imgProps } = useImageLoadState(run?.detail.headerCard.url);
 
   const handleOpenInApp = (id: string) => {
     const url = `https://nikerunclub.sng.link/A6sko/96h7?_dl=x-callback-url/audioguidedrun/details?id%3D${id}`;
     window.open(url, "_blank");
   };
 
-  return (
-    <div className="container mx-auto p-4 space-y-4">
-      <div className="flex items-center gap-4 mb-6">
-        <Button onClick={() => window.history.back()} variant="link">
-          ← Back
-        </Button>
-        <h1 className="text-2xl font-bold">{run.detail.headerCard.title}</h1>
-      </div>
+  const [isBottomButtonVisible, setIsBottomButtonVisible] = useState(false);
+  const startRunButtonInHeaderRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (!startRunButtonInHeaderRef.current) return;
 
-      <div className="space-y-4">
-        <p className="text-gray-600">{run.detail.headerCard.subtitle}</p>
-        {run.detail.content.map((content, index) => (
-          <Card key={index}>
-            <CardHeader>
-              <CardTitle>{content.title}</CardTitle>
-            </CardHeader>
-            {content.body ? (
-              <CardContent>
-                <div className="text-gray-700" dangerouslySetInnerHTML={{ __html: content.body }} />
-              </CardContent>
-            ) : content.type === "MUSIC" ? (
-              <CardContent>
-                <div className="flex flex-col gap-4">
-                  {content.providers.map((provider) => (
-                    <a
-                      key={provider.type}
-                      href={provider.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-neon-600 hover:text-neon-800"
-                    >
-                      {provider.type === "APPLE_MUSIC" ? (
-                        <>
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                          </svg>
-                          Apple Music
-                        </>
-                      ) : provider.type === "SPOTIFY" ? (
-                        <>
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
-                          </svg>
-                          Spotify
-                        </>
-                      ) : (
-                        provider.type
-                      )}
-                    </a>
-                  ))}
-                </div>
-              </CardContent>
-            ) : (
-              <CardContent>
-                <pre>{JSON.stringify(content, null, 2)}</pre>
-              </CardContent>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setIsBottomButtonVisible(false);
+        } else {
+          setIsBottomButtonVisible(true);
+        }
+      });
+    });
+
+    observer.observe(startRunButtonInHeaderRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const loadingImageClassNames = cn("transition-opacity duration-500 opacity-0", {
+    "opacity-100": loadingState === "loaded",
+  });
+
+  if (!run) {
+    return <div>Run not found</div>;
+  }
+
+  return (
+    <>
+      <div>
+        <div className="w-full aspect-[4/5] md:aspect-[2/1] relative overflow-clip">
+          <img
+            draggable={false}
+            {...imgProps}
+            alt=""
+            className={cn(
+              "w-full h-full object-cover object-top md:blur-3xl md:scale-150 select-none",
+              loadingImageClassNames,
             )}
-          </Card>
-        ))}
-        <div className="flex justify-end">
-          <Button onClick={() => handleOpenInApp(run.id)} variant="default">
-            Start Run
+          />
+          <img
+            draggable={false}
+            src={run.detail.headerCard.url}
+            alt=""
+            className={cn(
+              "max-md:hidden absolute top-0 w-full h-full object-contain object-top select-none",
+              loadingImageClassNames,
+            )}
+          />
+          <div className="absolute top-0 left-0 w-full">
+            <div className="absolute inset-0 -bottom-16 fadeout-to-bottom" />
+            <div className="absolute inset-0 -bottom-2 mask-gradient-to-b mask-b-from-0 backdrop-blur-md" />
+
+            <div className="relative container mx-auto p-4 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Button onClick={() => window.history.back()} variant="ghost" className="text-white">
+                  <ChevronLeft className="w-6! h-6!" />
+                  <div className="font-bold select-none">
+                    <span className="text-primary">
+                      <Run className="w-6 h-6 mr-1.5 -mt-[3px] inline-block" />
+                      NRC
+                    </span>
+                    <span className="max-md:hidden"> Guided Runs</span>
+                  </div>
+                </Button>
+              </div>
+
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleOpenInApp(run.id);
+                }}
+                className="md:hidden"
+                ref={startRunButtonInHeaderRef}
+              >
+                <Run />
+                Open in App
+              </Button>
+            </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 w-full">
+            <div className="absolute inset-0 -top-32 fadeout-to-top" />
+            <div className="absolute inset-0 -top-16 mask-gradient-to-t backdrop-blur-md mask-t-from-0" />
+            <div className="relative container mx-auto p-4 flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold text-white drop-shadow-lg">{run.detail.headerCard.title}</h1>
+                <p className="text-muted-foreground mt-1">{run.runType}</p>
+              </div>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleOpenInApp(run.id);
+                }}
+                className="max-md:hidden"
+              >
+                <Run />
+                Open in App
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="container mx-auto p-4 space-y-4 relative">
+        <div className="space-y-8">
+          {run.detail.content.map((content, index) => (
+            <RunSectionContents content={content} key={index} />
+          ))}
+        </div>
+        <div className="md:hidden sticky bottom-4 left-0 w-full flex justify-center z-10">
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              handleOpenInApp(run.id);
+            }}
+            size="lg"
+            className={cn("opacity-0 scale-90 transition-[opacity,scale] duration-300", {
+              "opacity-100 scale-100": isBottomButtonVisible,
+            })}
+          >
+            <Run />
+            Open in App
           </Button>
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }
+
+interface RunSectionProps {
+  content: Content;
+}
+const RunSectionContents = (props: RunSectionProps) => {
+  const { content } = props;
+  const headingClassName = cn("text-2xl font-bold mb-1");
+
+  if (content.type === "MUSIC") {
+    return (
+      <section>
+        <h2 className={cn(headingClassName, "mb-2")}>Suggested Music</h2>
+        <div className="flex gap-2 items-start">
+          {content.providers.map((provider) => (
+            <Button
+              key={provider.type}
+              asChild
+              variant="secondary"
+              className={cn("no-underline align-start", {
+                "bg-[#e64d58] hover:bg-[#e64d58]/80": provider.type === "APPLE_MUSIC",
+                "bg-[#65d46e] hover:bg-[#65d46e]/80 text-black": provider.type === "SPOTIFY",
+              })}
+            >
+              <a key={provider.type} href={provider.url} target="_blank" rel="noopener noreferrer">
+                {provider.type === "APPLE_MUSIC" ? (
+                  <>
+                    <AppleMusic className="w-5 h-5" />
+                    Apple Music
+                  </>
+                ) : provider.type === "SPOTIFY" ? (
+                  <>
+                    <Spotify className="w-5 h-5" />
+                    Spotify
+                  </>
+                ) : (
+                  provider.type
+                )}
+              </a>
+            </Button>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (content.body) {
+    return (
+      <section>
+        <h2 className={headingClassName}>{content.title}</h2>
+        <div className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: content.body }} />
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <h2 className={headingClassName}>{content.title}</h2>
+      <pre>{JSON.stringify(content, null, 2)}</pre>
+    </section>
+  );
+};

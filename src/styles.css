@@ -1,8 +1,5 @@
 @import "tailwindcss";
-
 @plugin "tailwindcss-animate";
-
-@custom-variant dark (&:is(.dark *));
 
 body {
   @apply m-0;
@@ -13,67 +10,45 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  @apply before:fixed before:inset-0 before:-z-1 before:pointer-events-none;
+  @apply before:bg-background;
+
+  @apply after:fixed after:inset-0 after:pointer-events-none after:z-[2147483647];
+}
+
+body::after {
+  background: url("data:image/svg+xml,%0A%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeBlend mode='screen'/%3E%3C/filter%3E%3Crect width='500' height='500' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 @theme {
-  --color-neon-50: oklch(0.9909 0.034 112.36);
-  --color-neon-100: oklch(0.9788 0.0728 115.99);
-  --color-neon-200: oklch(0.9618 0.1328 118.14);
-  --color-neon-300: oklch(0.94 0.1914 121.3);
-  --color-neon-400: oklch(0.9037 0.2148 123.39);
-  --color-neon-500: oklch(0.8233 0.2074 125.6);
-  --color-neon-600: oklch(0.6943 0.1776 126.49);
-  --color-neon-700: oklch(0.5677 0.144 126.79);
-  --color-neon-800: oklch(0.4811 0.1178 126.2);
-  --color-neon-900: oklch(0.4257 0.1003 126.71);
-  --color-neon-950: oklch(0.2883 0.072 127.16);
+  --color-neon-50: oklch(99.17% 0.026 116.07);
+  --color-neon-100: oklch(98.36% 0.054 116.37);
+  --color-neon-200: oklch(96.78% 0.111 117.53);
+  --color-neon-300: oklch(95.61% 0.155 118.64);
+  --color-neon-400: oklch(94.55% 0.191 120.07);
+  --color-neon-500: oklch(93.68% 0.217 121.54);
+  --color-neon-600: oklch(88.91% 0.218 123.05);
+  --color-neon-700: oklch(71.4% 0.175 122.9);
+  --color-neon-800: oklch(52.48% 0.128 122.23);
+  --color-neon-900: oklch(33.7% 0.081 121.25);
+  --color-neon-950: oklch(22.42% 0.054 120.96);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: var(--color-neon-500);
-  --primary-foreground: oklch(0.21 0.006 285.885);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.871 0.006 286.286);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.21 0.006 285.885);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.871 0.006 286.286);
-}
-
-.dark {
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.141 0.005 285.823);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.141 0.005 285.823);
   --popover-foreground: oklch(0.985 0 0);
+  --primary: var(--color-neon-500);
+  --primary-foreground: oklch(0.21 0.006 285.885);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.274 0.006 286.033);
@@ -90,6 +65,7 @@ code {
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+  --radius: 0.625rem;
   --sidebar: oklch(0.21 0.006 285.885);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -155,20 +131,56 @@ code {
       rgba(231, 231, 254, 0.13) 0px 1px 0.5px 0px inset,
       rgba(4, 4, 11, 0.54) 0px 2px 4px -2px;
   }
-
-  .noise:before {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: url("data:image/svg+xml,%0A%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeBlend mode='screen'/%3E%3C/filter%3E%3Crect width='500' height='500' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
-    mix-blend-mode: soft-light;
-    pointer-events: none;
-  }
 }
 
 @layer base {
   a {
     @apply text-primary underline;
+  }
+}
+
+@layer components {
+  .fadeout-to-top {
+    background: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--background) 100%, transparent) 0%,
+      color-mix(in oklab, var(--background) 98.7%, transparent) 8.1%,
+      color-mix(in oklab, var(--background) 95.1%, transparent) 15.5%,
+      color-mix(in oklab, var(--background) 89.6%, transparent) 22.5%,
+      color-mix(in oklab, var(--background) 82.5%, transparent) 29%,
+      color-mix(in oklab, var(--background) 74.1%, transparent) 35.3%,
+      color-mix(in oklab, var(--background) 64.8%, transparent) 41.2%,
+      color-mix(in oklab, var(--background) 55%, transparent) 47.1%,
+      color-mix(in oklab, var(--background) 45%, transparent) 52.9%,
+      color-mix(in oklab, var(--background) 35.2%, transparent) 58.8%,
+      color-mix(in oklab, var(--background) 25.9%, transparent) 64.7%,
+      color-mix(in oklab, var(--background) 17.5%, transparent) 71%,
+      color-mix(in oklab, var(--background) 10.4%, transparent) 77.5%,
+      color-mix(in oklab, var(--background) 4.9%, transparent) 84.5%,
+      color-mix(in oklab, var(--background) 1.3%, transparent) 91.9%,
+      color-mix(in oklab, var(--background) 0%, transparent) 100%
+    );
+  }
+
+  .fadeout-to-bottom {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--background) 100%, transparent) 0%,
+      color-mix(in oklab, var(--background) 98.7%, transparent) 8.1%,
+      color-mix(in oklab, var(--background) 95.1%, transparent) 15.5%,
+      color-mix(in oklab, var(--background) 89.6%, transparent) 22.5%,
+      color-mix(in oklab, var(--background) 82.5%, transparent) 29%,
+      color-mix(in oklab, var(--background) 74.1%, transparent) 35.3%,
+      color-mix(in oklab, var(--background) 64.8%, transparent) 41.2%,
+      color-mix(in oklab, var(--background) 55%, transparent) 47.1%,
+      color-mix(in oklab, var(--background) 45%, transparent) 52.9%,
+      color-mix(in oklab, var(--background) 35.2%, transparent) 58.8%,
+      color-mix(in oklab, var(--background) 25.9%, transparent) 64.7%,
+      color-mix(in oklab, var(--background) 17.5%, transparent) 71%,
+      color-mix(in oklab, var(--background) 10.4%, transparent) 77.5%,
+      color-mix(in oklab, var(--background) 4.9%, transparent) 84.5%,
+      color-mix(in oklab, var(--background) 1.3%, transparent) 91.9%,
+      color-mix(in oklab, var(--background) 0%, transparent) 100%
+    );
   }
 }
