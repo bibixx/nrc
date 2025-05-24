@@ -178,8 +178,6 @@ const RunSectionContents = (props: RunSectionProps) => {
   const headingClassName = cn("text-2xl font-bold mb-1");
 
   if (content.type === "MUSIC") {
-    console.log(content);
-
     return (
       <section>
         <h2 className={cn(headingClassName, "mb-3")}>Suggested Music</h2>

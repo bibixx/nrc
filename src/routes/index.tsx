@@ -4,30 +4,42 @@ import { useWindowVirtualizer } from "@tanstack/react-virtual";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import type { VirtualItem } from "@tanstack/react-virtual";
-import type { ChangeEvent } from "react";
 import type { RunType } from "@/data/endrichedRuns";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Run } from "@/components/icons/Run";
 import { Footer } from "@/components/Footer";
 import { ENRICHED_RUNS } from "@/data/endrichedRuns";
 import { BULLET_POINT, NARROW_NON_BREAKING_SPACE, NON_BREAKING_SPACE } from "@/lib/text";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/")({
   component: IndexPage,
 });
 
+const UNSELECTED_ACTIVITY_TYPES: RunType[] = ["Pregnancy", "Race", "Walk", "Treadmill"];
 let cache: VirtualItem[] = [];
 function IndexPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedActivityType, setSelectedActivityType] = useState<"all" | RunType>("all");
 
   // Get unique activity types
   const activityTypes = useMemo(() => {
     const types = new Set(ENRICHED_RUNS.map((run) => run.runType));
     return Array.from(types).sort();
   }, []);
+
+  const selectedActivityTypesByDefault = useMemo(() => {
+    return activityTypes.filter((type) => !UNSELECTED_ACTIVITY_TYPES.includes(type));
+  }, [activityTypes]);
+
+  const [selectedActivityTypes, setSelectedActivityTypes] = useState<RunType[]>(selectedActivityTypesByDefault);
 
   const filteredRuns = ENRICHED_RUNS.filter((run) => {
     const searchLower = searchQuery.toLowerCase();
@@ -36,7 +48,7 @@ function IndexPage() {
       run.landing.subtitle.toLowerCase().includes(searchLower) ||
       run.runDetails?.body?.toLowerCase().includes(searchLower);
 
-    const matchesActivityType = selectedActivityType === "all" || run.runType === selectedActivityType;
+    const matchesActivityType = selectedActivityTypes.includes(run.runType);
     return matchesSearch && matchesActivityType;
   });
 
@@ -66,9 +78,10 @@ function IndexPage() {
         <Header
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          selectedActivityType={selectedActivityType}
-          setSelectedActivityType={setSelectedActivityType}
+          selectedActivityTypes={selectedActivityTypes}
+          setSelectedActivityTypes={setSelectedActivityTypes}
           activityTypes={activityTypes}
+          selectedActivityTypesByDefault={selectedActivityTypesByDefault}
         />
         <div
           ref={listRef}
@@ -171,17 +184,41 @@ function formatGoal(goal: number, activityType: "DURATION" | "DISTANCE" | "SPEED
 interface HeaderProps {
   searchQuery: string;
   setSearchQuery: (searchQuery: string) => void;
-  selectedActivityType: "all" | RunType;
-  setSelectedActivityType: (selectedActivityType: "all" | RunType) => void;
+  selectedActivityTypes: RunType[];
+  setSelectedActivityTypes: React.Dispatch<React.SetStateAction<RunType[]>>;
   activityTypes: Array<RunType>;
+  selectedActivityTypesByDefault: RunType[];
 }
+
 const Header = ({
   searchQuery,
   setSearchQuery,
-  selectedActivityType,
-  setSelectedActivityType,
+  selectedActivityTypes,
+  setSelectedActivityTypes,
   activityTypes,
+  selectedActivityTypesByDefault,
 }: HeaderProps) => {
+  const handleTypeToggle = (type: RunType) => {
+    setSelectedActivityTypes((prev) => {
+      if (prev.includes(type)) {
+        return prev.filter((t) => t !== type);
+      }
+      return [...prev, type];
+    });
+  };
+
+  const handleSelectAll = () => {
+    setSelectedActivityTypes(activityTypes);
+  };
+
+  const handleUnselectAll = () => {
+    setSelectedActivityTypes([]);
+  };
+
+  const handleReset = () => {
+    setSelectedActivityTypes(selectedActivityTypesByDefault);
+  };
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-6 select-none">
@@ -196,21 +233,42 @@ const Header = ({
           type="search"
           placeholder="Search runs by name..."
           value={searchQuery}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <Select value={selectedActivityType} onValueChange={setSelectedActivityType}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select activity type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="justify-start">
+              {selectedActivityTypes.length === activityTypes.length
+                ? "All selected"
+                : `${selectedActivityTypes.length} selected`}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel className="select-none">Activity Types</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="flex gap-2 px-2 py-1.5">
+              <Button variant="outline" size="sm" className="flex-1 h-8" onClick={handleSelectAll}>
+                Select All
+              </Button>
+              <Button variant="outline" size="sm" className="flex-1 h-8" onClick={handleUnselectAll}>
+                Unselect All
+              </Button>
+              <Button variant="outline" size="sm" className="flex-1 h-8" onClick={handleReset}>
+                Reset
+              </Button>
+            </div>
+            <DropdownMenuSeparator />
             {activityTypes.map((type) => (
-              <SelectItem key={type} value={type}>
+              <DropdownMenuCheckboxItem
+                key={type}
+                checked={selectedActivityTypes.includes(type)}
+                onCheckedChange={() => handleTypeToggle(type)}
+              >
                 {type}
-              </SelectItem>
+              </DropdownMenuCheckboxItem>
             ))}
-          </SelectContent>
-        </Select>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </>
   );
