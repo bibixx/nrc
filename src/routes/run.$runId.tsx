@@ -141,15 +141,15 @@ function RunDetailsPage() {
 
       <div
         className={cn(
-          "sticky bottom-0 left-0 pb-4 w-full flex justify-center z-10",
-          "opacity-0 transition-[opacity] duration-300",
+          "relative max-md:sticky bottom-0 left-0 pb-4 w-full flex justify-center z-10",
+          "max-md:opacity-0 transition-[opacity] duration-300",
           {
-            "opacity-100": isBottomButtonVisible,
+            "max-md:opacity-100": isBottomButtonVisible,
           },
         )}
       >
-        <div className="absolute inset-0 -top-4 backdrop-blur-xs mask-t-from-[32px]" />
-        <div className="absolute inset-0 -top-4 fadeout-to-top" />
+        <div className="md:hidden absolute inset-0 -top-4 backdrop-blur-xs mask-t-from-[32px]" />
+        <div className="md:hidden absolute inset-0 -top-4 fadeout-to-top" />
 
         <Button
           onClick={(e) => {
@@ -157,8 +157,8 @@ function RunDetailsPage() {
             handleOpenInApp(run.id);
           }}
           size="lg"
-          className={cn("scale-90 transition-[scale] duration-300", {
-            "scale-100": isBottomButtonVisible,
+          className={cn("max-md:scale-90 transition-[scale] duration-300", {
+            "max-md:scale-100": isBottomButtonVisible,
           })}
         >
           <Run />
